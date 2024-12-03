@@ -11,6 +11,10 @@ const wss = new WebSocket.Server({
 const rooms = {};
 
 wss.on("connection", (ws, req) => {
+  const path = req.url.split("?")[0];
+  const urlPath = new URL(req.url).path;
+  console.log(`New connection to path ${path}`);
+  console.log(`New connection to urlPath ${urlPath}`);
   const params = new URLSearchParams(req.url.split("?")[1]);
   const roomID = params.get("room");
   const clientType = params.get("type");
@@ -53,7 +57,9 @@ wss.on("connection", (ws, req) => {
   });
 
   ws.on("message", (message) => {
+    console.log("Incoming message: ", message);
     if (ws === room.teacher) {
+      console.log(`Teacher in room ${roomID} sent: ${message}`);
       room.students.forEach((student) => {
         if (student.readyState === WebSocket.OPEN) {
           student.send(message);
@@ -61,7 +67,13 @@ wss.on("connection", (ws, req) => {
       });
     } else {
       if (room.teacher && room.teacher.readyState === WebSocket.OPEN) {
+        console.log(`Student in room ${roomID} sent: ${message}`);
         room.teacher.send(message);
+        room.students.forEach((student) => {
+          if (student !== ws && student.readyState === WebSocket.OPEN) {
+            student.send(message);
+          }
+        });
       }
     }
   });
