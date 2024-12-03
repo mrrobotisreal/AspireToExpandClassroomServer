@@ -2,6 +2,7 @@ const WebSocket = require("ws");
 
 const wss = new WebSocket.Server({
   port: 9999,
+  path: "/classroom",
   verifyClient: (info) => {
     console.log("Client origin: ", info.origin); // TODO: Add more verification logic
     return true;
@@ -11,10 +12,6 @@ const wss = new WebSocket.Server({
 const rooms = {};
 
 wss.on("connection", (ws, req) => {
-  const path = req.url.split("?")[0];
-  const urlPath = new URL(req.url).path;
-  console.log(`New connection to path ${path}`);
-  console.log(`New connection to urlPath ${urlPath}`);
   const params = new URLSearchParams(req.url.split("?")[1]);
   const roomID = params.get("room");
   const clientType = params.get("type");
@@ -91,4 +88,4 @@ wss.on("connection", (ws, req) => {
   });
 });
 
-console.log("WebSocket server started on ws://localhost:9999");
+console.log("WebSocket server started on ws://localhost:9999/classroom");
